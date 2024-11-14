@@ -91,16 +91,5 @@ public class CustomerVerified {
 
 
 
-    private Double loanAmount;
-    private String numberOfEmi;
-    private Double emiAmount; // Holds the "repayment" from LoanEntity as per your note
-    private Double principalPart;
-    private String processingFee;
-    private String tenure;
-    private Double totalPaid;
-    private String DisbursedAmount;
-    private LocalDateTime ApprovedDate;
-    private LocalDateTime DisbursedDate;
-    private LocalDateTime CollectionDate;
 
 }

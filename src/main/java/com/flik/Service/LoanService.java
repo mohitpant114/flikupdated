@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanService {
@@ -640,48 +641,31 @@ public class LoanService {
 
     }
 
+    public List<LoanEntity> getVerifiedLoans() {
+        // Fetch all loans with status 'VERIFIED'
+        List<LoanEntity> verifiedLoans = loanRepository.findByStatus("VERIFIED");
 
-    @Transactional
-    public CustomerVerified verifyLoan(Long loanId) {
-        // Fetch loan details from LoanEntity
-        LoanEntity loan = loanRepository.findById(loanId)
-                .orElseThrow(() -> new IllegalArgumentException("Loan not found"));
+        // Process each loan to calculate processing fee, disbursed amount and other fields
+        return verifiedLoans.stream().map(loan -> {
+            if (loan.getLoanAmount() != null && loan.getLoanAmount() > 0) {
+                // Calculate 4% processing fee
+                double processingFee = loan.getLoanAmount() * 0.04;
+                double disbursedAmount = loan.getLoanAmount() - processingFee;
 
-        // Calculate processing fee and net disbursed amount
-        double processingFee = loan.getLoanAmount() * 0.04;
-        double netDisbursedAmount = loan.getLoanAmount() - processingFee;
+                // Set the processing fee and disbursed amount as string to match the required data type
+                loan.setProcessingFee(String.format("%.2f", processingFee));
+                loan.setDisbursedAmount(String.format("%.2f", disbursedAmount));
 
-        // Populate the CustomerVerified entity
-        CustomerVerified customerVerified = new CustomerVerified();
-        customerVerified.setCustomerId(loan.getId());
-        customerVerified.setPartnerLoanId(loan.getPartnerLoanId());
-        customerVerified.setBorrowerName(loan.getBorrowerName());
-        customerVerified.setMobileNumber(loan.getMobileNumber());
-        customerVerified.setEmail(loan.getEmailId());
-
-        // Set loan details and calculated values
-        customerVerified.setLoanAmount(loan.getLoanAmount()); // Original loan amount
-        customerVerified.setProcessingFee(String.valueOf(processingFee));
-        customerVerified.setTotalPaid(loan.getLoanAmount());
-        customerVerified.setPrincipalPart(loan.getLoanAmount());
-        customerVerified.setEmiAmount(loan.getLoanAmount());
-
-        // Default values
-        customerVerified.setNumberOfEmi("1");
-        customerVerified.setTenure("45");
-
-        // Set dates to current datetime
-        customerVerified.setApprovedDate(LocalDateTime.now());
-        customerVerified.setDisbursedDate(LocalDateTime.now());
-        customerVerified.setCollectionDate(LocalDateTime.now());
-
-        // Disbursed amount after processing fee
-        customerVerified.setDisbursedAmount(String.valueOf(netDisbursedAmount));
-        customerVerified.setStatus("Verified");
-
-        // Save the verification details to the repository
-        return customerVerifiedRepository.save(customerVerified);
+                // Set totalPaid, repayment, and principalPart to loanAmount
+                loan.setTotalPaid(String.format("%.2f", loan.getLoanAmount()));
+                loan.setRepayment(String.format("%.2f", loan.getLoanAmount()));
+                loan.setPrincipalPart(String.format("%.2f", loan.getLoanAmount()));
+            }
+            return loan;
+        }).collect(Collectors.toList());
     }
+
+
 
 
 

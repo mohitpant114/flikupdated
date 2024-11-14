@@ -203,6 +203,18 @@ public class CustomerController {
                 .body(resource);
     }
 
+    @GetMapping("/statusByCustomerId")
+    public ResponseEntity<String> getCustomerStatus(@RequestParam("id") Long customerId) {
+        // Call the service to get the status of the customer
+        String status = customerService.getCustomerStatusById(customerId);
+
+        if (status != null) {
+            return ResponseEntity.ok(status);  // Return status if customer exists
+        } else {
+            return ResponseEntity.notFound().build();  // Return 404 if customer not found
+        }
+    }
+
 
 
 

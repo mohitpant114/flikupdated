@@ -693,7 +693,16 @@ public class CustomerServices {
     } catch (IOException e) {
         throw new RuntimeException("Error accessing file: " + e.getMessage(), e);
     }
-}
+
+    }
+
+    public String getCustomerStatusById(Long customerId) {
+        // Fetch the customer by ID (returns Optional)
+        Optional<CustomerEntity> customerOptional = customerRepository.findById(customerId);
+
+        // If customer is present, return their status, otherwise return null
+        return customerOptional.map(CustomerEntity::getStatus).orElse(null);
+    }
 
 
 

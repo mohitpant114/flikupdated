@@ -133,10 +133,26 @@ public class LoanController {
         return loanService.searchByMobileNumber(mobileNumber);
     }
 
-    @PostMapping("/loanDeduct")
-    public CustomerVerified verifyLoan(@RequestParam("id") Long loanId) {
-        return loanService.verifyLoan(loanId);
+//    @PostMapping("/loanDeduct")
+//    public CustomerVerified verifyLoan(@RequestParam("id") Long loanId) {
+//        return loanService.verifyLoan(loanId);
+//    }
+
+    @GetMapping("/verifiedLoans")
+    public ResponseEntity<List<LoanEntity>> getVerifiedLoans() {
+        try {
+            List<LoanEntity> verifiedLoans = loanService.getVerifiedLoans();
+            if (verifiedLoans.isEmpty()) {
+                return ResponseEntity.noContent().build(); // Return 204 if no verified loans are found
+            }
+            return ResponseEntity.ok(verifiedLoans); // Return 200 and the list of loans
+        } catch (Exception e) {
+            // Log the exception and return 500 Internal Server Error
+            return ResponseEntity.status(500).body(null);
+        }
     }
+
+
 
 
 
